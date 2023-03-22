@@ -7,7 +7,7 @@
 @using Syncfusion.Blazor.Grids;
 
 
-<SfGantt @ref="Gantt" TValue="TaskData" Height="450px" Width="800px" AllowFiltering="true" AllowResizing="true" AllowReordering="true" AllowMultiSorting="true" AllowRowDragAndDrop="true" AllowSelection="true" AllowSorting="true" EnableContextMenu="true" LoadChildOnDemand="true" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel", "Search", "Indent", "Outdent", "ExpandAll", "CollapseAll" })">
+<SfGantt @ref="Gantt" TValue="TaskData" Height="450px" Width="800px" AllowFiltering="true" AllowResizing="true" AllowReordering="true" AllowMultiSorting="true" AllowRowDragAndDrop="true" AllowSelection="true" AllowSorting="true" EnableContextMenu="true" LoadChildOnDemand="true" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel", "Search", "ExpandAll", "CollapseAll" })">
     <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
     <GanttTaskFields Id="TaskID" Name="TaskName" ResourceInfo="Resources" StartDate="StartDate" EndDate="EndDate" Progress="Progress" Duration="Duration" ParentID="ParentID">
     </GanttTaskFields>
