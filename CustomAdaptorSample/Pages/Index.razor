@@ -7,7 +7,7 @@
 @using Syncfusion.Blazor.Grids;
 
 
-<SfGantt @ref="Gantt" TValue="TaskData" Height="450px" Width="800px" AllowFiltering="true" AllowResizing="true" AllowReordering="true" AllowMultiSorting="true" AllowRowDragAndDrop="true" AllowSelection="true" AllowSorting="true" EnableContextMenu="true" LoadChildOnDemand="true" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel", "Search", "ExpandAll", "CollapseAll" })">
+<SfGantt @ref="Gantt" TValue="TaskData" Height="450px" Width="800px" AllowFiltering="true" AllowResizing="true" AllowReordering="true" AllowMultiSorting="true" AllowRowDragAndDrop="true" AllowSelection="true" AllowSorting="true" EnableContextMenu="true" LoadChildOnDemand="true" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel", "Search", "Indent", "Outdent", "ExpandAll", "CollapseAll" })">
     <SfDataManager AdaptorInstance="@typeof(CustomAdaptor)" Adaptor="Adaptors.CustomAdaptor"></SfDataManager>
     <GanttTaskFields Id="TaskID" Name="TaskName" ResourceInfo="Resources" StartDate="StartDate" EndDate="EndDate" Progress="Progress" Duration="Duration" ParentID="ParentID">
     </GanttTaskFields>
@@ -45,10 +45,10 @@
     public static SfGantt<TaskData>? Gantt { get; set; }
     public static List<TaskData> GanttData { get; set; }
     public static List<TaskData> gantt = new List<TaskData>();
-    private List<ResourceAlloacteData> ResourceCollection { get; set; }
-    public static List<TaskData> DisplayedData = new List<TaskData>();
-    public static int? DisplayCount;
-    public static string ResourceName { get; set; }
+    private List<ResourceAlloacteData> ResourceCollection { get; set; } // To store the resource collections
+    public static List<TaskData> DisplayedData = new List<TaskData>(); //  To store the displayed records
+    public static int? DisplayCount; //  Get the displayed records count
+    public static string ResourceName { get; set; } // Get the resource name on dropdown list
 
     public class TaskData
     {
@@ -63,12 +63,6 @@
         public TaskData() { }
     }
 
-    protected override void OnInitialized()
-    {
-        GanttData = GetGantt().ToList();
-        this.ResourceCollection = GetResources;
-    }
-
     public class ResourceAlloacteData
     {
         public int ResourceId { get; set; }
@@ -76,7 +70,15 @@
         public double? Unit { get; set; }
     }
 
-    public static List<ResourceAlloacteData> GetResources = new List<ResourceAlloacteData>()
+    // Assigning the datasource collection on SfGantt
+    protected override void OnInitialized()
+    {
+        GanttData = GetGantt().ToList();
+        this.ResourceCollection = GetResources;
+    }
+
+    // Resource collection
+    private static List<ResourceAlloacteData> GetResources = new List<ResourceAlloacteData>()
     {
         new ResourceAlloacteData() { ResourceId= 1, ResourceName= "Martin Tamer"},
         new ResourceAlloacteData() { ResourceId= 2, ResourceName= "Rose Fuller" },
@@ -91,12 +93,14 @@
         new ResourceAlloacteData() { ResourceId= 12, ResourceName= "Construction Supervisor" }
     };
 
-    public void ChangeResource(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, ResourceAlloacteData> args)
+    // Handles the change event of the resource dropdown and sets the selected resource name.
+    private void ChangeResource(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, ResourceAlloacteData> args)
     {
         ResourceName = args.Value;
     }
 
-    public static List<TaskData> GetGantt()
+    // Gantt datasource collection
+    private static List<TaskData> GetGantt()
     {
         if (gantt.Count == 0)
         {
@@ -127,8 +131,8 @@
         return gantt;
     }
 
-
-    public static List<ResourceAlloacteData> getResourceRecords()
+    // This method used to get the resource id and name collections based on GetCurrentViewRecords() method
+    private static List<ResourceAlloacteData> getResourceRecords()
     {
         List<ResourceAlloacteData> Resources = new List<ResourceAlloacteData>();
         var records = Gantt.GetCurrentViewRecords();
@@ -158,7 +162,8 @@
         return Resources;
     }
 
-    public int GetChildRecordsCount(int? id)
+    // returns the child records count
+    private int GetChildRecordsCount(int? id)
     {
         var count = 0;
         for (var i = 0; i < GetGantt().Count; i++)
@@ -171,8 +176,6 @@
         }
         return count;
     }
-
-
 
     // Implementing custom adaptor by extending the DataAdaptor class.
     public class CustomAdaptor : DataAdaptor
@@ -274,6 +277,7 @@
                     DataSource = GetHierarchyDataToDisplay(DataSource);
                 }
             }
+            // Searching
             if (dm.Search != null && dm.Search.Count > 0)
             {
                 DataSource = DataOperations.PerformSearching(DataSource, dm.Search);
@@ -313,8 +317,8 @@
             return value;
         }
 
-
-        public List<TaskData> GetHierarchyDataToDisplay(IEnumerable<TaskData> records)
+        // This method used to get the records collection for every action (ex: fitering.,)
+        private List<TaskData> GetHierarchyDataToDisplay(IEnumerable<TaskData> records)
         {
             foreach (var record in records)
             {
@@ -351,7 +355,8 @@
             return DisplayedData;
         }
 
-        public void AddDisplayedRecord(TaskData record)
+        // Adding the record for DisplayedData and avoid the duplicate records
+        private void AddDisplayedRecord(TaskData record)
         {
             if (DisplayedData.FindIndex(d => d.TaskID == record.TaskID) == -1)
             {
@@ -359,7 +364,8 @@
             }
         }
 
-        public List<TaskData> GetDisplayData(TaskData data)
+        // This method used to get the parent and child records based on actions (ex: fitering.,)
+        private List<TaskData> GetDisplayData(TaskData data)
         {
             var parentRecord = GanttData.Where(p => p.TaskID == data.ParentID).FirstOrDefault();
             if (parentRecord.ParentID != null)
@@ -370,7 +376,6 @@
                     DisplayedData.Add(parentRecord);
                     DisplayCount++;
                 }
-
             }
             else
             {
@@ -385,6 +390,7 @@
         }
     }
 
+    // Event that is triggered when a row is being dropping
     private void RowDroppingHandler(Syncfusion.Blazor.Grids.RowDroppingEventArgs<TaskData> args)
     {
         var position = args.Target.ID; // drop position
